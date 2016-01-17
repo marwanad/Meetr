@@ -255,7 +255,6 @@ public class MainActivity extends AppCompatActivity implements OnBookingComplete
 
             @Override
             public void onResponse(Response response) throws IOException {
-                Log.d("Booking", response.body().string());
             }
         });
     }
