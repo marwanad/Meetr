@@ -61,7 +61,7 @@ public class RoomBookingDialogFragment extends DialogFragment implements DatePic
                 new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        Date date = new Date(_year, _month, _day, _startHour, _startMin);
+                        Date date = new Date(_year, _month, _day, hourOfDay, minute);
                         _onBookingCompleteListener.onComplete(_roomId, dateToIso(date), "2016-07-17T04:21:39+00:00");
                     }
                 }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true).show();
