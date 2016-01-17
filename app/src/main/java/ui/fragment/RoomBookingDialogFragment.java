@@ -5,9 +5,7 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.TimePickerDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
 
@@ -30,6 +28,10 @@ public class RoomBookingDialogFragment extends DialogFragment implements DatePic
     private OnBookingCompleteListener _onBookingCompleteListener;
     public static final String EXTRA_ROOM_ID = "extra.roomId";
     private String _roomId;
+    private Calendar c;
+    int year;
+    int month;
+    int day;
 
     public static RoomBookingDialogFragment newInstance(String id) {
         RoomBookingDialogFragment f = new RoomBookingDialogFragment();
@@ -50,24 +52,12 @@ public class RoomBookingDialogFragment extends DialogFragment implements DatePic
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Bundle b = getArguments();
         _roomId = b.getString(EXTRA_ROOM_ID);
-        final Calendar c = Calendar.getInstance();
-        int year = c.get(Calendar.YEAR);
-        final int month = c.get(Calendar.MONTH);
-        int day = c.get(Calendar.DAY_OF_MONTH);
-        DatePickerDialog dialog = new DatePickerDialog(getActivity(), this, year, month, day);
-        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Next", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        Date date = new Date(_year, _month, _day, _startHour, _startMin);
-                        _onBookingCompleteListener.onComplete(_roomId, dateToIso(date), "2016-07-17T04:21:39+00:00");
-                    }
-                }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true).show();
-            }
-        });
-        return dialog;
+        c = Calendar.getInstance();
+        year = c.get(Calendar.YEAR);
+        month = c.get(Calendar.MONTH);
+        day = c.get(Calendar.DAY_OF_MONTH);
+
+        return new DatePickerDialog(getActivity(), this, year, month, day);
     }
 
     public void onAttach(Activity activity) {
@@ -81,10 +71,17 @@ public class RoomBookingDialogFragment extends DialogFragment implements DatePic
 
     @Override
     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-        Log.d("Booking", String.valueOf(year));
         _year = year;
         _month = monthOfYear;
         _day = dayOfMonth;
+        new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                Calendar c = Calendar.getInstance();
+                c.set(_year, _month, _day, hourOfDay, minute);
+                _onBookingCompleteListener.onComplete(_roomId, dateToIso(c.getTime()), "2016-07-17T04:21:39+00:00");
+            }
+        }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true).show();
     }
 
     private String dateToIso(Date date) {

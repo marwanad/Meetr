@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -128,6 +129,7 @@ public class MainActivity extends AppCompatActivity implements OnBookingComplete
     private String createBookingRequest(String id, String start, String end) {
         BookingRequest request = new BookingRequest(id, start, end, "marw");
         Gson gson = new Gson();
+        Log.d("Booking", gson.toJson(request));
         return gson.toJson(request);
     }
 

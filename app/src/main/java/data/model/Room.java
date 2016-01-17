@@ -63,4 +63,8 @@ public class Room implements Parcelable {
         dest.writeString(this.description);
         dest.writeTypedList(this.bookings);
     }
+    public void unlock()
+    {
+
+    }
 }
