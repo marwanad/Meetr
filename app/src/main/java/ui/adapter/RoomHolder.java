@@ -43,10 +43,21 @@ public class RoomHolder extends ItemViewHolder<Room> {
         super(view);
     }
 
-    private String getImageUrl(String name) {
-        switch (name.toLowerCase()) {
+    private String getImageUrl(String location) {
+        switch (location) {
+            // handling on the client side for now
+            case "EIT 1015":
+                return "https://uwaterloo.ca/earth-sciences-museum/sites/ca.earth-sciences-museum/files/styles/body-500px-wide/public/uploads/images/old_museum.jpg";
+            case "Room 303":
+                return "http://historicalhamilton.com/media/images/3206.jpg";
+            case "Room 1337":
+                return "http://sais2011.uwaterloo.ca/images/UW_E5_byMatthewManjos.png";
+            case "MC4063":
+                return "https://upload.wikimedia.org/wikipedia/commons/8/8d/UWaterloo_MC.jpg";
+            case "QNC2020":
+                return "https://c1.staticflickr.com/9/8480/8189020665_d2e7aa1c61_b.jpg";
         }
-        return "http://img3.wikia.nocookie.net/__cb20091030151422/starwars/images/d/d9/Luke-rotjpromo.jpg";
+        return "http://sais2011.uwaterloo.ca/images/UW_E5_byMatthewManjos.png";
     }
 
     @Override
@@ -78,7 +89,7 @@ public class RoomHolder extends ItemViewHolder<Room> {
         mRoomText.setText(room.name);
         mLocationText.setText(room.location);
         Picasso.with(getContext())
-                .load(getImageUrl(room.name)).placeholder(R.drawable.e5).error(R.drawable.e5)
+                .load(getImageUrl(room.location)).placeholder(R.drawable.ic_refresh_pink_500_18dp).error(R.drawable.ic_error_outline_pink_500_18dp)
                 .into(mRoomImage);
     }
 

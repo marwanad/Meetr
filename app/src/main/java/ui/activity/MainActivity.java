@@ -10,8 +10,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
-import java.util.ArrayList;
+import com.google.gson.Gson;
+import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -31,7 +40,9 @@ public class MainActivity extends AppCompatActivity {
     @Bind(R.id.recycler_view)
     RecyclerView mRecycleView;
     EasyRecyclerAdapter<Room> mRoomsAdapter;
-    ArrayList<Room> _roomList;
+    List<Room> _roomList;
+    private final String URL = "http://meetrapp.herokuapp.com/meetingRooms";
+    private OkHttpClient _client = new OkHttpClient();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         setUpToolBar();
-        loadRooms();
+        getRooms();
         setUpRecyclerView();
     }
 
@@ -66,14 +77,10 @@ public class MainActivity extends AppCompatActivity {
     private void setUpRecyclerView() {
         mRecycleView.setLayoutManager(new LinearLayoutManager(this));
         mRoomsAdapter = new EasyRecyclerAdapter<>(this, RoomHolder.class);
-        mRoomsAdapter.setItems(_roomList);
-        mRecycleView.setAdapter(mRoomsAdapter);
-
         mSwipeRefresh.setColorSchemeResources(R.color.primary);
         mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-//                mRoomsAdapter.setItems(new ArrayList<Room>());
                 refreshRooms();
             }
         });
@@ -83,15 +90,42 @@ public class MainActivity extends AppCompatActivity {
         mSwipeRefresh.setRefreshing(false);
     }
 
-    private void loadRooms() {
-        _roomList = new ArrayList<>();
-        _roomList.add(new Room("Sedra Smith", "34873489543dfdsj", "E5", "Nice meme"));
-        _roomList.add(new Room("QNC", "dsfsdf3wsd", "Lol", "eat shit"));
-        _roomList.add(new Room("EIT 1010", "sdfdsf", "EIT", "eat shit"));
-        _roomList.add(new Room("Teach Me Master", "324rsdfs", "E5", "lel kek"));
-        _roomList.add(new Room("Sedra Smith", "34873489543dfdsj", "E5", "Nice meme"));
-        _roomList.add(new Room("Sedra Smith", "34873489543dfdsj", "E5", "Nice meme"));
+    private void loadRooms(String response) {
+        Gson gson = new Gson();
+        Room[] room = gson.fromJson(response, Room[].class);
+        _roomList = Arrays.asList(room);
+        setListForAdapter();
+    }
+
+    private void getRooms() {
+        Request request = new Request.Builder().url(URL).build();
+        _client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                Toast.makeText(MainActivity.this, "Please check your connection.", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                final Response _response = response;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            loadRooms(_response.body().string());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    private void setListForAdapter() {
         mProgressBar.setVisibility(View.GONE);
         mSwipeRefresh.setRefreshing(false);
+        mRoomsAdapter.setItems(_roomList);
+        mRecycleView.setAdapter(mRoomsAdapter);
     }
 }
