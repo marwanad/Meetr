@@ -2,9 +2,7 @@ package ui.adapter;
 
 import android.app.Activity;
 import android.app.DialogFragment;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.media.MediaPlayer;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -15,6 +13,7 @@ import data.model.Room;
 import marwanad.meetr.R;
 import ui.activity.RoomActivity;
 import ui.fragment.RoomBookingDialogFragment;
+import ui.fragment.UnLockDialogFragment;
 import uk.co.ribot.easyadapter.ItemViewHolder;
 import uk.co.ribot.easyadapter.PositionInfo;
 import uk.co.ribot.easyadapter.annotations.LayoutId;
@@ -96,11 +95,7 @@ public class RoomHolder extends ItemViewHolder<Room> {
     }
 
     private void showUnlockDialog() {
-        MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.unlock);
-        ProgressDialog dialog = new ProgressDialog(getContext());
-        dialog.setMessage("Loading..");
-        dialog.setCancelable(false);
-        dialog.show();
-        mp.start();
+        UnLockDialogFragment frag = new UnLockDialogFragment();
+        frag.show(((Activity) getContext()).getFragmentManager(), "unlockFrag");
     }
 }
