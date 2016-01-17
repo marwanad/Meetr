@@ -6,6 +6,7 @@ import android.app.DialogFragment;
 import android.app.ProgressDialog;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 
 import listeners.OnRoomUnlockRequest;
 import marwanad.meetr.R;
@@ -19,6 +20,12 @@ public class UnLockDialogFragment extends DialogFragment {
         mp.start();
         final ProgressDialog dialog = new ProgressDialog(getActivity());
         dialog.setMessage("Loading..");
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                dialog.dismiss();
+            }
+        }, 3000);
         unlockDoor();
         return dialog;
     }
@@ -34,6 +41,5 @@ public class UnLockDialogFragment extends DialogFragment {
 
     private void unlockDoor() {
         _onRoomUnlockRequest.onRoomUnlock();
-        dismiss();
     }
 }
