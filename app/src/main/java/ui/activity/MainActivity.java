@@ -43,12 +43,13 @@ import butterknife.ButterKnife;
 import data.model.BookingRequest;
 import data.model.Room;
 import listeners.OnBookingCompleteListener;
+import listeners.OnRoomUnlockRequest;
 import marwanad.meetr.R;
 import ui.adapter.RoomHolder;
 import uk.co.ribot.easyadapter.EasyRecyclerAdapter;
 
 
-public class MainActivity extends AppCompatActivity implements OnBookingCompleteListener, BeaconConsumer {
+public class MainActivity extends AppCompatActivity implements OnBookingCompleteListener, BeaconConsumer, OnRoomUnlockRequest {
     @Bind(R.id.toolbar)
     Toolbar mToolbar;
     @Bind(R.id.progress_indicator)
@@ -62,6 +63,8 @@ public class MainActivity extends AppCompatActivity implements OnBookingComplete
     List<Room> _roomList;
     private final String URL = "http://meetrapp.herokuapp.com/meetingRooms";
     private final String BOOK_URL = "http://meetrapp.herokuapp.com/bookMeetingRoomById";
+    private static final String UNLOCK_URL = "http://meetrapp.herokuapp.com/unlockDoor";
+
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private OkHttpClient _client = new OkHttpClient();
     private BackgroundPowerSaver backgroundPowerSaver;
@@ -237,5 +240,21 @@ public class MainActivity extends AppCompatActivity implements OnBookingComplete
         SharedPreferences.Editor edit = prefs.edit();
         edit.putString("meeting.duration", duration);
         edit.commit();
+    }
+
+    @Override
+    public void onRoomUnlock() {
+        Request request = new Request.Builder().url(UNLOCK_URL).build();
+        _client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                Toast.makeText(getApplicationContext(), "Please check your connection.", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                Log.d("Booking", response.body().string());
+            }
+        });
     }
 }
