@@ -125,6 +125,8 @@ public class MainActivity extends AppCompatActivity implements OnBookingComplete
                     Log.i("beacon", "Detected Beacon");
                     if (activateBeacon) {
                         Log.i("beacon", "The first beacon I see is about " + distance + " meters away.");
+                        Toast.makeText(MainActivity.this, "Room Door Unlocked", Toast.LENGTH_SHORT).show();
+                        onRoomUnlock();
                         lastUuid = currentUuid;
                         activateBeacon = false;
                     }
