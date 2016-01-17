@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements OnBookingComplete
     private BeaconManager beaconManager;
     private int currentUuid;
     private int lastUuid = -1;
-    private boolean activateBeacon = true;
+    private boolean activateBeacon = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -235,6 +235,7 @@ public class MainActivity extends AppCompatActivity implements OnBookingComplete
     @Override
     public void onComplete(String id, String start, String end) {
         sendBookingRequest(id, start, end);
+        activateBeacon = true;
     }
 
     private void writeDurationToPrefs(String duration) {
