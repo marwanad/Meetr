@@ -70,17 +70,17 @@ public class MainActivity extends AppCompatActivity {
         mRecycleView.setAdapter(mRoomsAdapter);
 
         mSwipeRefresh.setColorSchemeResources(R.color.primary);
-//        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-//            @Override
-//            public void onRefresh() {
+        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
 //                mRoomsAdapter.setItems(new ArrayList<Room>());
-//                refreshRooms();
-//            }
-//        });
+                refreshRooms();
+            }
+        });
     }
 
     private void refreshRooms() {
-
+        mSwipeRefresh.setRefreshing(false);
     }
 
     private void loadRooms() {

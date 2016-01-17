@@ -32,8 +32,8 @@ public class RoomHolder extends ItemViewHolder<Room> {
     @ViewId(R.id.text_roomName)
     TextView mRoomText;
 
-    @ViewId(R.id.text_description)
-    TextView mDescriptionText;
+    @ViewId(R.id.text_location)
+    TextView mLocationText;
 
     @ViewId(R.id.room_image)
     ImageView mRoomImage;
@@ -44,8 +44,8 @@ public class RoomHolder extends ItemViewHolder<Room> {
     }
 
     private String getImageUrl(String name) {
-//        switch (name.toLowerCase()) {
-//        }
+        switch (name.toLowerCase()) {
+        }
         return "http://img3.wikia.nocookie.net/__cb20091030151422/starwars/images/d/d9/Luke-rotjpromo.jpg";
     }
 
@@ -76,10 +76,9 @@ public class RoomHolder extends ItemViewHolder<Room> {
     @Override
     public void onSetValues(Room room, PositionInfo positionInfo) {
         mRoomText.setText(room.name);
-        mDescriptionText.setText(room.description);
-
+        mLocationText.setText(room.location);
         Picasso.with(getContext())
-                .load(getImageUrl(room.name))
+                .load(getImageUrl(room.name)).placeholder(R.drawable.e5).error(R.drawable.e5)
                 .into(mRoomImage);
     }
 
