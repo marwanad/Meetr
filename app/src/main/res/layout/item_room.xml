@@ -87,6 +87,15 @@
                 android:text="Details"
                 android:textColor="@color/primary" />
 
+            <TextView
+                android:id="@+id/text_unlock"
+                style="@style/CardStyle"
+                android:layout_alignBottom="@+id/text_details"
+                android:layout_toRightOf="@+id/text_details"
+                android:background="@drawable/touchable_background_white"
+                android:text="Unlock"
+                android:textColor="@color/green" />
+
         </RelativeLayout>
 
     </RelativeLayout>

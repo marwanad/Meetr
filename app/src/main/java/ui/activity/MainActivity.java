@@ -14,8 +14,10 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
@@ -24,12 +26,14 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import data.model.BookingRequest;
 import data.model.Room;
+import listeners.OnBookingCompleteListener;
 import marwanad.meetr.R;
 import ui.adapter.RoomHolder;
 import uk.co.ribot.easyadapter.EasyRecyclerAdapter;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnBookingCompleteListener {
     @Bind(R.id.toolbar)
     Toolbar mToolbar;
     @Bind(R.id.progress_indicator)
@@ -42,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
     EasyRecyclerAdapter<Room> mRoomsAdapter;
     List<Room> _roomList;
     private final String URL = "http://meetrapp.herokuapp.com/meetingRooms";
+    private final String BOOK_URL = "http://meetrapp.herokuapp.com/bookMeetingRoomById";
+    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private OkHttpClient _client = new OkHttpClient();
 
     @Override
@@ -94,7 +100,35 @@ public class MainActivity extends AppCompatActivity {
         Gson gson = new Gson();
         Room[] room = gson.fromJson(response, Room[].class);
         _roomList = Arrays.asList(room);
-        setListForAdapter();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                setListForAdapter();
+            }
+        });
+    }
+
+    private void sendBookingRequest(String id, String start, String end) {
+        String req = createBookingRequest(id, start, end);
+        RequestBody body = RequestBody.create(JSON, req);
+        Request request = new Request.Builder().url(BOOK_URL).post(body).build();
+        _client.newCall(request).enqueue(new Callback() {
+
+            @Override
+            public void onFailure(Request request, IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+            }
+        });
+    }
+
+    private String createBookingRequest(String id, String start, String end) {
+        BookingRequest request = new BookingRequest(id, start, end, "marw");
+        Gson gson = new Gson();
+        return gson.toJson(request);
     }
 
     private void getRooms() {
@@ -107,17 +141,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Response response) throws IOException {
-                final Response _response = response;
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            loadRooms(_response.body().string());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
+                loadRooms(response.body().string());
             }
         });
     }
@@ -127,5 +151,10 @@ public class MainActivity extends AppCompatActivity {
         mSwipeRefresh.setRefreshing(false);
         mRoomsAdapter.setItems(_roomList);
         mRecycleView.setAdapter(mRoomsAdapter);
+    }
+
+    @Override
+    public void onComplete(String id, String start, String end) {
+        sendBookingRequest(id, start, end);
     }
 }

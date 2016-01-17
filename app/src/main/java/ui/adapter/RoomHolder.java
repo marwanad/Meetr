@@ -1,5 +1,9 @@
 package ui.adapter;
 
+import android.app.Activity;
+import android.app.DialogFragment;
+import android.app.ProgressDialog;
+import android.media.MediaPlayer;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -9,6 +13,7 @@ import com.squareup.picasso.Picasso;
 import data.model.Room;
 import marwanad.meetr.R;
 import ui.activity.RoomActivity;
+import ui.fragment.RoomBookingDialogFragment;
 import uk.co.ribot.easyadapter.ItemViewHolder;
 import uk.co.ribot.easyadapter.PositionInfo;
 import uk.co.ribot.easyadapter.annotations.LayoutId;
@@ -38,26 +43,11 @@ public class RoomHolder extends ItemViewHolder<Room> {
     @ViewId(R.id.room_image)
     ImageView mRoomImage;
 
+    @ViewId(R.id.text_unlock)
+    TextView mUnlockText;
 
     public RoomHolder(View view) {
         super(view);
-    }
-
-    private String getImageUrl(String location) {
-        switch (location) {
-            // handling on the client side for now
-            case "EIT 1015":
-                return "https://uwaterloo.ca/earth-sciences-museum/sites/ca.earth-sciences-museum/files/styles/body-500px-wide/public/uploads/images/old_museum.jpg";
-            case "Room 303":
-                return "http://historicalhamilton.com/media/images/3206.jpg";
-            case "Room 1337":
-                return "http://sais2011.uwaterloo.ca/images/UW_E5_byMatthewManjos.png";
-            case "MC4063":
-                return "https://upload.wikimedia.org/wikipedia/commons/8/8d/UWaterloo_MC.jpg";
-            case "QNC2020":
-                return "https://c1.staticflickr.com/9/8480/8189020665_d2e7aa1c61_b.jpg";
-        }
-        return "http://sais2011.uwaterloo.ca/images/UW_E5_byMatthewManjos.png";
     }
 
     @Override
@@ -82,6 +72,12 @@ public class RoomHolder extends ItemViewHolder<Room> {
                 getContext().startActivity(RoomActivity.getStartIntent(getContext(), getItem()));
             }
         });
+        mUnlockText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showUnlockDialog();
+            }
+        });
     }
 
     @Override
@@ -89,11 +85,21 @@ public class RoomHolder extends ItemViewHolder<Room> {
         mRoomText.setText(room.name);
         mLocationText.setText(room.location);
         Picasso.with(getContext())
-                .load(getImageUrl(room.location)).placeholder(R.drawable.ic_refresh_pink_500_18dp).error(R.drawable.ic_error_outline_pink_500_18dp)
+                .load(room.image).placeholder(R.drawable.ic_refresh_pink_500_18dp).error(R.drawable.ic_error_outline_pink_500_18dp)
                 .into(mRoomImage);
     }
 
     private void getMeARoom() {
+        DialogFragment newFragment = RoomBookingDialogFragment.newInstance(getItem()._id);
+        newFragment.show(((Activity) getContext()).getFragmentManager(), "roomBooking");
+    }
 
+    private void showUnlockDialog() {
+        MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.unlock);
+        ProgressDialog dialog = new ProgressDialog(getContext());
+        dialog.setMessage("Loading..");
+        dialog.setCancelable(false);
+        dialog.show();
+        mp.start();
     }
 }

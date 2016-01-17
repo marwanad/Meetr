@@ -3,7 +3,7 @@ package data.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Created by Marwan.
@@ -14,24 +14,27 @@ public class Room implements Parcelable {
     public String _id;
 
     public String location;
+    public String image;
     public String description;
 
-    public List<String> bookings;
+    public ArrayList<Booking> bookings;
 
     protected Room(Parcel in) {
-        this.name = in.readString();
         this._id = in.readString();
+        this.name = in.readString();
         this.location = in.readString();
+        this.image = in.readString();
         this.description = in.readString();
-        this.bookings = in.createStringArrayList();
+        in.readTypedList(new ArrayList<Booking>(), Booking.CREATOR);
     }
 
-    public Room(String name, String id, String location, String description) {
-        this.name = name;
+    public Room(String id, String name, String location, String image, String description, ArrayList<Booking> bookings) {
         this._id = id;
+        this.name = name;
         this.location = location;
+        this.image = image;
         this.description = description;
-
+        this.bookings = bookings;
     }
 
     public static final Creator<Room> CREATOR = new Creator<Room>() {
@@ -53,10 +56,11 @@ public class Room implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.name);
         dest.writeString(this._id);
+        dest.writeString(this.name);
         dest.writeString(this.location);
+        dest.writeString(this.image);
         dest.writeString(this.description);
-        dest.writeStringList(this.bookings);
+        dest.writeTypedList(this.bookings);
     }
 }
