@@ -1,13 +1,12 @@
 package ui.fragment;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.TimePickerDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
 
@@ -23,27 +22,29 @@ import listeners.OnBookingCompleteListener;
 /**
  * Created by Marwan.
  */
-public class RoomBookingDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
+public class RoomBookingDialogFragment extends DialogFragment {
     private int _year;
     private int _month;
     private int _day;
     private OnBookingCompleteListener _onBookingCompleteListener;
     public static final String EXTRA_ROOM_ID = "extra.roomId";
+    public static final String EXTRA_DIALOG_ID = "extra.dialog";
     private String _roomId;
+    private String _duration;
     private Calendar c;
-    private Calendar startCal;
-    private Calendar endCal;
-
+    private Calendar _startCal;
     int year;
     int month;
     int day;
-    private final String[] time = {"1 minute", "30 minutes", "1 hour", "2 hour" };
+    int hour;
+    int min;
 
-    public static RoomBookingDialogFragment newInstance(String id) {
+    public static RoomBookingDialogFragment newInstance(String id, String duration) {
         RoomBookingDialogFragment f = new RoomBookingDialogFragment();
 
         Bundle args = new Bundle();
         args.putString(EXTRA_ROOM_ID, id);
+        args.putString(EXTRA_DIALOG_ID, duration);
         f.setArguments(args);
         return f;
     }
@@ -52,18 +53,18 @@ public class RoomBookingDialogFragment extends DialogFragment implements DatePic
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         _roomId = getArguments().getString(EXTRA_ROOM_ID);
-    }
-
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        Bundle b = getArguments();
-        _roomId = b.getString(EXTRA_ROOM_ID);
+        _duration = getArguments().getString(EXTRA_DIALOG_ID);
         c = Calendar.getInstance();
         year = c.get(Calendar.YEAR);
         month = c.get(Calendar.MONTH);
         day = c.get(Calendar.DAY_OF_MONTH);
+        hour = c.get(Calendar.HOUR_OF_DAY);
+        min = c.get(Calendar.MINUTE);
+    }
 
-        return new DatePickerDialog(getActivity(), this, year, month, day);
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        return new DatePickerDialog(getActivity(), onDatePickedListener, year, month, day);
     }
 
     public void onAttach(Activity activity) {
@@ -75,25 +76,30 @@ public class RoomBookingDialogFragment extends DialogFragment implements DatePic
         }
     }
 
-    @Override
-    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-        _year = year;
-        _month = monthOfYear;
-        _day = dayOfMonth;
-        new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+    // hacky for now, no more dialogs
+    private void completeBooking(int hourOfDay, int min) {
+        Log.d("Booking", "meeting duration is" + _duration);
+        Calendar endCal = Calendar.getInstance();
+        endCal.set(_year, _month, _day, hourOfDay, min);
 
-                startCal = Calendar.getInstance();
-                startCal.set(_year, _month, _day, hourOfDay, minute);
-                showEndDialog();
-            }
-        }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true).show();
-
-    }
-
-    private void completeBooking() {
-        _onBookingCompleteListener.onComplete(_roomId, dateToIso(startCal.getTime()), dateToIso(endCal.getTime()));
+        switch (_duration) {
+            case "1 minute":
+                endCal.add(Calendar.MINUTE, 1);
+                break;
+            case "2 minute":
+                endCal.add(Calendar.MINUTE, 2);
+                break;
+            case "30 minutes":
+                endCal.add(Calendar.MINUTE, 30);
+                break;
+            case "1 hour":
+                endCal.add(Calendar.HOUR_OF_DAY, 1);
+                break;
+            case "2 hour":
+                endCal.add(Calendar.HOUR_OF_DAY, 2);
+                break;
+        }
+        _onBookingCompleteListener.onComplete(_roomId, dateToIso(_startCal.getTime()), dateToIso(endCal.getTime()));
     }
 
     private String dateToIso(Date date) {
@@ -102,34 +108,21 @@ public class RoomBookingDialogFragment extends DialogFragment implements DatePic
         return dateFormat.format(date);
     }
 
-    private void showEndDialog() {
-        final AlertDialog endDialog;
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("How long is the meeting going to last ?");
-        builder.setSingleChoiceItems(time, -1, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int item) {
-                switch (item) {
-                    case 0:
-                        break;
-                    case 1:
-                        break;
-                    case 2:
-                        break;
-                    case 3:
-                        break;
-                }
-                dismiss();
-            }
-        });
-        endDialog = builder.create();
-        endDialog.show();
-//        endCal = Calendar.getInstance();
-//        endCal.set(_year, _month, _day, hourOfDay, minute);
-//        completeBooking();
-    }
-
-    @Override
-    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-
-    }
+    private DatePickerDialog.OnDateSetListener onDatePickedListener = new DatePickerDialog.OnDateSetListener() {
+        @Override
+        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            _year = year;
+            _month = monthOfYear;
+            _day = dayOfMonth;
+            new TimePickerDialog(getActivity(), onStartTimeListener, hour, min, true).show();
+        }
+    };
+    private TimePickerDialog.OnTimeSetListener onStartTimeListener = new TimePickerDialog.OnTimeSetListener() {
+        @Override
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            _startCal = Calendar.getInstance();
+            _startCal.set(_year, _month, _day, hourOfDay, minute);
+            completeBooking(hourOfDay, minute);
+        }
+    };
 }

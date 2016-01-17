@@ -3,6 +3,7 @@ package ui.adapter;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.media.MediaPlayer;
 import android.view.View;
 import android.widget.ImageView;
@@ -90,7 +91,7 @@ public class RoomHolder extends ItemViewHolder<Room> {
     }
 
     private void getMeARoom() {
-        DialogFragment newFragment = RoomBookingDialogFragment.newInstance(getItem()._id);
+        DialogFragment newFragment = RoomBookingDialogFragment.newInstance(getItem()._id, getContext().getSharedPreferences("prefs", Context.MODE_PRIVATE).getString("meeting.duration", "1 minute"));
         newFragment.show(((Activity) getContext()).getFragmentManager(), "roomBooking");
     }
 

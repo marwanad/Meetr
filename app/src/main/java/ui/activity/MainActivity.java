@@ -1,5 +1,8 @@
 package ui.activity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -72,6 +75,8 @@ public class MainActivity extends AppCompatActivity implements OnBookingComplete
         switch (item.getItemId()) {
             case R.id.action_about:
                 return true;
+            case R.id.action_duration:
+                chooseDuration();
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -155,8 +160,28 @@ public class MainActivity extends AppCompatActivity implements OnBookingComplete
         mRecycleView.setAdapter(mRoomsAdapter);
     }
 
+    private void chooseDuration() {
+        final String[] items = {"1 minute", "2 minute" ,"30 minutes", "1 hour", "2 hour" };
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Select The Meeting Duration");
+        builder.setSingleChoiceItems(items, -1, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int item) {
+                writeDurationToPrefs(items[item]);
+                dialog.dismiss();
+            }
+        });
+        builder.create().show();
+    }
+
     @Override
     public void onComplete(String id, String start, String end) {
         sendBookingRequest(id, start, end);
+    }
+
+    private void writeDurationToPrefs(String duration) {
+        SharedPreferences prefs = getSharedPreferences("prefs", MODE_PRIVATE);
+        SharedPreferences.Editor edit = prefs.edit();
+        edit.putString("meeting.duration", duration);
+        edit.commit();
     }
 }
