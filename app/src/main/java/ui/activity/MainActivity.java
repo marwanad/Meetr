@@ -183,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements OnBookingComplete
     private String createBookingRequest(String id, String start, String end) {
         BookingRequest request = new BookingRequest(id, start, end, "marw");
         Gson gson = new Gson();
+        Log.d("Booking", gson.toJson(request));
         return gson.toJson(request);
     }
 
